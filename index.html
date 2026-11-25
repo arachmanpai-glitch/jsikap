@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<!--
+  J-SIKAP · aplikasi yang bisa dipasang (PWA) — PPM Al-Jumhuriyah
+  SATU-SATUNYA YANG PERLU DIUBAH: tempel URL aplikasi web Apps Script (berakhiran /exec) di bawah ini.
+-->
+<script>
+  const APP_URL = https://script.google.com/macros/s/AKfycbwajIh5qYuqrp-poq575zARz2m9M-FYKv8wr2Z1AlhEXJVD_cuUiOUc2cFVxucMQZLz/exec;
+</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#075f3d">
+<meta name="description" content="J-SIKAP — absensi, nilai, karakter & literasi siswa PPM Al-Jumhuriyah">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="J-SIKAP">
+<title>J-SIKAP</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+  html,body{margin:0;height:100%;background:#075f3d;font-family:Inter,Arial,sans-serif;overflow:hidden}
+  #app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f4f7f5;padding-top:env(safe-area-inset-top,0px);box-sizing:border-box}
+  .layar{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:24px;
+    background:radial-gradient(circle at 20% 10%,#1d8a5f 0,transparent 45%),radial-gradient(circle at 90% 90%,#0f4c5c 0,transparent 50%),linear-gradient(135deg,#064e33,#0b6b45);transition:opacity .5s,visibility .5s;z-index:5}
+  .layar.hilang{opacity:0;visibility:hidden}
+  .layar img{width:120px;height:120px;filter:drop-shadow(0 10px 24px #0008)}
+  .layar h1{font-size:32px;letter-spacing:3px;margin:16px 0 4px}
+  .layar .inst{font-weight:800}
+  .layar .slogan{font-size:12px;font-style:italic;color:#f8e9aa;margin-top:12px;line-height:1.6}
+  .muat{width:120px;height:4px;border-radius:4px;background:#ffffff33;margin:26px auto 0;overflow:hidden}
+  .muat span{display:block;width:40%;height:100%;background:#c9a227;animation:m 1.1s ease-in-out infinite}
+  @keyframes m{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+  .pesan{background:#fff;color:#17231f;border-radius:18px;padding:18px;max-width:340px;margin-top:20px;font-size:14px;line-height:1.5;text-align:left}
+  .pesan b{color:#075f3d}
+  button{font:800 15px Inter,Arial,sans-serif;border:0;border-radius:14px;padding:13px 18px;cursor:pointer}
+  #pasang{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:9;display:none;align-items:center;gap:12px;
+    background:#fff;border-radius:18px;padding:12px 14px;box-shadow:0 10px 30px #0004;color:#17231f;font-size:13px}
+  #pasang.tampil{display:flex}
+  #pasang img{width:44px;height:44px;border-radius:12px}
+  #pasang .sp{flex:1}
+  #pasang b{display:block;font-size:14px}
+  #pasang .ya{background:linear-gradient(135deg,#0b7d4f,#075f3d);color:#fff}
+  #pasang .tidak{background:none;color:#6c7773;padding:8px}
+</style>
+</head>
+<body>
+<iframe id="app" title="J-SIKAP" allow="camera; clipboard-write; fullscreen"></iframe>
+
+<div class="layar" id="splash">
+  <img src="icon-maskable-512.png" alt="" style="border-radius:28px">
+  <h1>J-SIKAP</h1>
+  <div class="inst">PPM Al-Jumhuriyah</div>
+  <div class="slogan">Lembur Ilmu, Kancah Ibadah,<br>Majlis Disiplin Wahana Perjuangan</div>
+  <div class="muat" id="muat"><span></span></div>
+  <div class="pesan" id="pesan" hidden></div>
+</div>
+
+<div id="pasang" role="dialog" aria-label="Pasang aplikasi">
+  <img src="icon-192.png" alt="">
+  <div class="sp"><b>Pasang J-SIKAP</b><span id="pasangTeks">Buka lebih cepat dari layar utama HP</span></div>
+  <button class="tidak" id="nanti">Nanti</button>
+  <button class="ya" id="pasangBtn">Pasang</button>
+</div>
+
+<script>
+{
+  const $ = s => document.querySelector(s);
+  const splash = $('#splash'), pesan = $('#pesan');
+  const tampilPesan = h => { $('#muat').hidden = true; pesan.hidden = false; pesan.innerHTML = h; };
+
+  /* 1. Muat aplikasi Apps Script di dalam bingkai layar penuh */
+  if (!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec/.test(APP_URL)) {
+    tampilPesan('<b>URL aplikasi belum diisi.</b><br>Buka file <b>index.html</b>, ganti tulisan TEMPEL_URL_APLIKASI_WEB_DI_SINI dengan URL aplikasi web Apps Script (berakhiran <b>/exec</b>), lalu unggah ulang.');
+  } else if (!navigator.onLine) {
+    tampilPesan('<b>Tidak ada koneksi internet.</b><br>J-SIKAP butuh internet untuk menyimpan data. Nyalakan data atau Wi-Fi, lalu <button onclick="location.reload()" style="background:#075f3d;color:#fff;margin-top:10px">Coba lagi</button>');
+  } else {
+    const fr = $('#app');
+    fr.addEventListener('load', () => setTimeout(() => splash.classList.add('hilang'), 600));
+    fr.src = APP_URL;
+    setTimeout(() => splash.classList.add('hilang'), 12000);
+  }
+  addEventListener('offline', () => { splash.classList.remove('hilang'); tampilPesan('<b>Koneksi terputus.</b><br>Data yang belum tersimpan aman di layar. Tunggu sinyal kembali.'); });
+  addEventListener('online', () => location.reload());
+
+  /* 2. Service worker: syarat agar Chrome menawarkan "Instal aplikasi" */
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+  /* 3. Tawaran pasang ke layar utama */
+  const terpasang = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  let tunda = null, tolak = false;
+  try { tolak = Date.now() - Number(localStorage.getItem('jsikap_nanti') || 0) < 3 * 864e5; } catch (e) {}
+  addEventListener('beforeinstallprompt', e => {
+    e.preventDefault(); tunda = e;
+    if (!terpasang && !tolak) $('#pasang').classList.add('tampil');
+  });
+  $('#pasangBtn').onclick = async () => {
+    if (tunda) { tunda.prompt(); await tunda.userChoice; tunda = null; }
+    $('#pasang').classList.remove('tampil');
+  };
+  $('#nanti').onclick = () => { $('#pasang').classList.remove('tampil'); try { localStorage.setItem('jsikap_nanti', Date.now()); } catch (e) {} };
+  addEventListener('appinstalled', () => $('#pasang').classList.remove('tampil'));
+  // iPhone/iPad: Safari tidak punya tombol pasang otomatis, tampilkan petunjuk
+  if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !terpasang && !tolak) {
+    $('#pasangTeks').textContent = 'Ketuk ikon Bagikan lalu "Tambah ke Layar Utama"';
+    $('#pasangBtn').textContent = 'Oke';
+    setTimeout(() => $('#pasang').classList.add('tampil'), 4000);
+  }
+}
+</script>
+</body>
+</html>
